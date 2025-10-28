@@ -1,5 +1,6 @@
 data/
 *.pt
+*.pth
 *.onnx
 __pycache__/
 .env
@@ -19,4 +20,7 @@ venv/
 **/.ruff_cache/
 **/.idea/
 **/.vscode/
+
+# Model bundles / large weights
+models/mitonet/*.pth
 

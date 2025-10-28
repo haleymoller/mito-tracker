@@ -2,8 +2,9 @@
   "name": "mitotracker-root",
   "private": true,
   "scripts": {
+    "postinstall": "npm ci --prefix ./frontend || npm install --prefix ./frontend",
     "dev": "npm --prefix ./frontend run dev",
-    "build": "npm --prefix ./frontend run build",
+    "build": "npm ci --prefix ./frontend || npm install --prefix ./frontend && npm --prefix ./frontend run build",
     "start": "npm --prefix ./frontend run start"
   }
 }

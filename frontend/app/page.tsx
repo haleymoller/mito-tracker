@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function Home() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  // Use Next.js API routes as a proxy to the backend to avoid CORS/localhost issues on Vercel
   const [file, setFile] = useState<File | null>(null);
   const [overlayUrl, setOverlayUrl] = useState<string | null>(null);
   const [maskUrl, setMaskUrl] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function Home() {
     // request LLM short analysis for every run
     form.append("analyze_text", "true");
     try {
-      const res = await fetch(API_URL + "/seg", { method: "POST", body: form });
+      const res = await fetch("/api/seg", { method: "POST", body: form });
       if (!res.ok) {
         const txt = await res.text();
         console.error("/seg error", res.status, txt);
@@ -162,7 +162,7 @@ export default function Home() {
           <div className="p-6 bg-[rgba(23,53,142,0.18)] rounded-2xl shadow">
             <h2 className="font-medium mb-2">Original</h2>
             {exampleId
-              ? <img src={`${API_URL}/examples/${exampleId}/image.png`} className="w-full rounded-md" />
+              ? <img src={`/api/examples/${exampleId}/image`} className="w-full rounded-md" />
               : (file
                 ? <img src={URL.createObjectURL(file)} className="w-full rounded-md" />
                 : <div className="text-sm text-[rgba(48,6,85,0.89)]">No image yet.</div>)}

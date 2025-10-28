@@ -1,0 +1,3 @@
+scikit-image>=0.18
+empanada-dl>=0.1.5
+imagecodecs

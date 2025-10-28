@@ -1,0 +1,5 @@
+channels: [conda-forge]
+dependencies:
+  - empanada-dl>=0.1.5
+  - imagecodecs
+  - scikit-image>=0.18

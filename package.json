@@ -6,7 +6,8 @@
     "dev": "npm --prefix ./frontend run dev",
     "build": "npm ci --prefix ./frontend || npm install --prefix ./frontend && npm --prefix ./frontend run build",
     "start": "npm --prefix ./frontend run start"
+  },
+  "devDependencies": {
+    "next": "15.5.6"
   }
 }
-
-

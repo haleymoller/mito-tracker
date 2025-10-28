@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Upload, Activity } from 'lucide-react';
-import { Button } from './components/ui/button';
-import { Card } from './components/ui/card';
-import { Slider } from './components/ui/slider';
-import { Checkbox } from './components/ui/checkbox';
-import { Input } from './components/ui/input';
-import { Label } from './components/ui/label';
-import { ImageDisplay } from './components/ImageDisplay';
-import { MetricsTable } from './components/MetricsTable';
-import { Header } from './components/Header';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Slider } from '../components/ui/slider';
+import { Checkbox } from '../components/ui/checkbox';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { ImageDisplay } from '../components/ImageDisplay';
+import { MetricsTable } from '../components/MetricsTable';
+import { Header } from '../components/Header';
 
 export default function App() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);

@@ -18,6 +18,11 @@ const mclaren = McLaren({ subsets: ["latin"], weight: "400" });
 export const metadata: Metadata = {
   title: "Mito Tracker",
   description: "Upload EMs to segment mitochondria, visualize overlays, and get metrics.",
+  icons: {
+    icon: "/mito.png",
+    apple: "/mito.png",
+    shortcut: "/mito.png",
+  },
 };
 
 export default function RootLayout({

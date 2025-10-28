@@ -6,6 +6,7 @@ import {
     TableHeader,
     TableRow,
 } from './ui/table';
+} from '../components/ui/table';
 
 interface Metric {
     id: number;

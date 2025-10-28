@@ -98,5 +98,30 @@ Two paths are supported.
 - Examples show no metrics: ensure `example_id` is set and example assets exist under `backend/examples/<id>/`
 - LLM assist missing: set `OPENAI_API_KEY` and verify model access
 
+## Production deployment (permanent backend URL)
+Use Render to host the FastAPI backend so the site always works (no tunnels).
+
+### One‑time setup
+1. Push this repo to GitHub (if not already).
+2. Go to Render → New → Blueprint → select your repo.
+3. Render will detect `render.yaml` at the repo root. Accept defaults.
+   - Service type: Web (Python)
+   - Root directory: `backend`
+   - Build: `pip install -r requirements.txt`
+   - Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Env vars: `MITONET_MODEL_URL=stupendous-sheep/1.1`. Add `OPENAI_API_KEY` if using LLM features.
+4. Click Deploy. When live, copy the service URL (e.g., `https://mito-tracker-backend.onrender.com`).
+
+### Wire frontend to backend
+1. In Vercel → Project → Settings → Environment Variables:
+   - Key: `BACKEND_URL`
+   - Value: your Render URL (e.g., `https://mito-tracker-backend.onrender.com`)
+   - Scope: All Environments
+2. Redeploy the site. The frontend proxies `/api/seg` and example images to `BACKEND_URL`.
+
+Notes
+- Add curated examples at `backend/examples/<id>/image.png` and `mask.png` to enable the example selector.
+- If you later fine‑tune MitoNet, set `MITONET_MODEL_PATH` to your BioImage.IO bundle and remove `MITONET_MODEL_URL`.
+
 ## License
 MIT

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mito-tracker-backend
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MITONET_MODEL_URL
+        value: stupendous-sheep/1.1
+      - key: OPENAI_API_KEY
+        sync: false
+    autoDeploy: true
+

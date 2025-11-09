@@ -29,36 +29,44 @@ export default function Home() {
   async function handleSeg() {
     if (!file && !exampleId) return;
     setLoading(true);
-    const form = new FormData();
-    if (exampleId) {
-      form.append("example_id", exampleId);
-    } else if (file) {
-      form.append("image", file);
-    }
-    form.append("threshold", String(threshold));
-    form.append("tta", String(tta));
-    form.append("use_llm", String(useLLM));
-    const pxNm = (exampleId && pixelSizeNm.trim().length === 0)
-      ? DEFAULT_EXAMPLE_NM_PER_PX
-      : pixelSizeNm;
-    if (pxNm.trim().length > 0) form.append("pixel_size_nm", pxNm);
-    // request LLM short analysis for every run
-    form.append("analyze_text", "true");
     try {
-      const res = await fetch("/api/seg", { method: "POST", body: form });
-      if (!res.ok) {
-        const txt = await res.text();
-        console.error("/seg error", res.status, txt);
-        alert("Segmentation failed: " + res.status);
-        setLoading(false);
-        return;
+      if (exampleId) {
+        // Use static assets for examples (no backend call)
+        setOverlayUrl(`/examples/${exampleId}/overlay.png`);
+        setMaskUrl(`/examples/${exampleId}/mask.png`);
+        const rsp = await fetch(`/examples/${exampleId}/metrics.json`, { cache: "no-store" });
+        if (rsp.ok) {
+          const data = await rsp.json();
+          setMetrics(Array.isArray(data.metrics) ? data.metrics : []);
+        } else {
+          setMetrics([]);
+        }
+        setAnalysisText(null);
+        setSegRan(true);
+      } else {
+        const form = new FormData();
+        form.append("image", file as File);
+        form.append("threshold", String(threshold));
+        form.append("tta", String(tta));
+        form.append("use_llm", String(useLLM));
+        const pxNm = pixelSizeNm.trim().length === 0 ? "" : pixelSizeNm;
+        if (pxNm.trim().length > 0) form.append("pixel_size_nm", pxNm);
+        form.append("analyze_text", "true");
+        const res = await fetch("/api/seg", { method: "POST", body: form });
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error("/seg error", res.status, txt);
+          alert("Segmentation failed: " + res.status);
+          setLoading(false);
+          return;
+        }
+        const out = await res.json();
+        setOverlayUrl(out.overlay_png_b64 ? "data:image/png;base64," + out.overlay_png_b64 : null);
+        setMaskUrl(out.mask_png_b64 ? "data:image/png;base64," + out.mask_png_b64 : null);
+        setMetrics(Array.isArray(out.metrics) ? out.metrics : []);
+        setAnalysisText(out.analysis_text ?? null);
+        setSegRan(true);
       }
-      const out = await res.json();
-      setOverlayUrl(out.overlay_png_b64 ? "data:image/png;base64," + out.overlay_png_b64 : null);
-      setMaskUrl(out.mask_png_b64 ? "data:image/png;base64," + out.mask_png_b64 : null);
-      setMetrics(Array.isArray(out.metrics) ? out.metrics : []);
-      setAnalysisText(out.analysis_text ?? null);
-      setSegRan(true);
     } catch (e) {
       console.error(e);
       alert("Network error during segmentation");
@@ -162,7 +170,7 @@ export default function Home() {
           <div className="p-6 bg-[rgba(23,53,142,0.18)] rounded-2xl shadow">
             <h2 className="font-medium mb-2">Original</h2>
             {exampleId
-              ? <img src={`/api/examples/${exampleId}/image`} className="w-full rounded-md" />
+              ? <img src={`/examples/${exampleId}/image.png`} className="w-full rounded-md" />
               : (file
                 ? <img src={URL.createObjectURL(file)} className="w-full rounded-md" />
                 : <div className="text-sm text-[rgba(48,6,85,0.89)]">No image yet.</div>)}

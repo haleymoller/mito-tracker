@@ -160,68 +160,7 @@ async def seg(
             arr = np.array(im)
             mask = np.array(Image.open(msk_p).convert("L"))
             mask = (mask > 127).astype(np.uint8) * 255
-            # For curated examples, morphologically tune mask by confidence, optionally split with watershed, then subsample
-            try:
-                t = float(threshold)
-                k = np.ones((3, 3), np.uint8)
-                # lower confidence => grow mask; higher => shrink mask
-                if t < 0.5:
-                    it = int(round((0.5 - t) * 8))  # 0..4 iters
-                    if it > 0:
-                        mask = cv2.dilate(mask, k, iterations=it)
-                elif t > 0.5:
-                    it = int(round((t - 0.5) * 8))
-                    if it > 0:
-                        mask = cv2.erode(mask, k, iterations=it)
-
-                # Watershed to split merged blobs into more components
-                try:
-                    from scipy import ndimage as ndi  # type: ignore
-                    from skimage.feature import peak_local_max  # type: ignore
-                    from skimage.segmentation import watershed  # type: ignore
-
-                    bin_m = (mask > 0).astype(np.uint8)
-                    if bin_m.any():
-                        dist = cv2.distanceTransform(bin_m, cv2.DIST_L2, 5)
-                        # local maxima as markers; min_distance scales with size
-                        min_dist = max(3, int(round(5 + 10 * t)))
-                        coords = peak_local_max(dist, footprint=np.ones(
-                            (3, 3)), labels=bin_m, min_distance=min_dist)
-                        markers = np.zeros_like(bin_m, dtype=np.int32)
-                        for idx, (r, c) in enumerate(coords, start=1):
-                            markers[r, c] = idx
-                        if markers.max() == 0:
-                            markers, _ = ndi.label(bin_m)
-                        labels_ws = watershed(-dist, markers, mask=bin_m)
-                        # rebuild mask as union of labels (still binary), but labels will be multiple components now
-                        mask = (labels_ws > 0).astype(np.uint8) * 255
-                except Exception:
-                    pass
-
-                # lower thr => keep more components
-                keep_frac = max(0.05, min(0.95, 1.0 - t))
-                cnts, _ = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                if cnts:
-                    areas = [(i, cv2.contourArea(c))
-                             for i, c in enumerate(cnts)]
-                    areas.sort(key=lambda x: x[1], reverse=True)
-                    keep_k = max(1, int(np.ceil(keep_frac * len(areas))))
-                    keep_idx = set([i for i, _ in areas[:keep_k]])
-                    new_mask = np.zeros_like(mask)
-                    for i, c in enumerate(cnts):
-                        if i in keep_idx:
-                            cv2.drawContours(
-                                new_mask, [c], -1, 255, thickness=cv2.FILLED)
-                    mask = new_mask
-                # simple debug log to verify threshold effect
-                try:
-                    print(
-                        f"[EXAMPLE {example_id}] thr={t:.2f} total_cnts={len(cnts) if cnts else 0} keep_k={keep_k if cnts else 0}")
-                except Exception:
-                    pass
-            except Exception:
-                pass
+            # For curated examples, use the preset mask exactly as provided (no tuning).
         else:
             # Fallback to uploaded image if example missing
             if image is None:
@@ -244,7 +183,7 @@ async def seg(
             arr, mask = _predict_mask_classical(im, thr=threshold)
 
     # Optional LLM assist: fuse with model mask
-    if use_llm:
+    if use_llm and not example_id:
         # Count before fusion
         try:
             pre_cnts, _ = cv2.findContours(

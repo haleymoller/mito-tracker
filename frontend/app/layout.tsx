@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   title: "Mito Tracker",
   description: "Upload EMs to segment mitochondria, visualize overlays, and get metrics.",
   icons: {
-    icon: "/mito.png",
-    apple: "/mito.png",
-    shortcut: "/mito.png",
+    icon: "/favicon.ico?v=2",
+    apple: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=2",
   },
 };
 
